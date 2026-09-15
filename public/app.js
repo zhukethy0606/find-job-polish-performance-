@@ -32,8 +32,10 @@ $("#pdf-file").addEventListener("change", async (event) => {
   }
   pdfStatus.textContent = "正在提取 PDF 中的文字…";
   try {
-    const pdfjsLib = await import("/vendor/pdf.min.mjs");
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "/vendor/pdf.worker.min.mjs";
+    // 改用 CDN 加载 PDF.js，不需要本地 vendor 文件夹
+    const pdfjsLib = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+    
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
     const pages = [];
     for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
