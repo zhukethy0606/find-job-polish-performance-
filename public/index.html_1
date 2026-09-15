@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>面试稿教练</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <a class="logo" href="/">面试稿<span>·</span>教练</a>
+      <p class="tagline">把面试复盘，变成下一次的底气</p>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <span class="badge">INTERVIEW REVIEW</span>
+        <h1>让每一句回答<br><em>更有说服力</em></h1>
+        <p class="hero-desc">粘贴录音转写稿，或上传 PDF。几分钟内梳理表达短板、需要补的证据，以及下一轮该怎么答。</p>
+      </div>
+      <div class="hero-points">
+        <div class="point">优先级明确的改进点</div>
+        <div class="point">每一项对应的原文证据</div>
+        <div class="point">可直接练习的追问清单</div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="input-card">
+        <div class="card-header">
+          <div>
+            <span class="step">01</span>
+            <h2>放入你的面试稿</h2>
+          </div>
+          <label class="role-label">
+            目标岗位
+            <input id="role" type="text" placeholder="例如：产品经理">
+          </label>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="paste">粘贴文字</button>
+          <button class="tab" data-tab="pdf">上传 PDF</button>
+        </div>
+
+        <div id="paste-pane">
+          <textarea id="transcript" placeholder="把面试录音转写稿粘贴在这里…&#10;&#10;建议保留提问和回答的原始顺序，分析会更准确。"></textarea>
+        </div>
+
+        <div id="pdf-pane" class="hidden">
+          <label class="dropzone" for="pdf-file">
+            <input id="pdf-file" type="file" accept="application/pdf,.pdf">
+            <div class="upload-icon">↑</div>
+            <div class="upload-text">
+              <strong>选择一份 PDF 文字稿</strong>
+              <span>只读取可复制文本的 PDF，不会保存文件</span>
+            </div>
+          </label>
+          <p id="pdf-status" class="status"></p>
+        </div>
+
+        <div class="actions">
+          <span class="privacy">内容只在本次分析中处理，不会被保存</span>
+          <button id="analyze" class="btn-primary">开始分析 →</button>
+        </div>
+        <p id="error" class="error"></p>
+      </div>
+
+      <aside class="guide-card">
+        <span class="step">02</span>
+        <h3>好稿的三个信号</h3>
+        <ul class="signals">
+          <li>
+            <strong>先结论</strong>
+            <span>让面试官快速抓住重点</span>
+          </li>
+          <li>
+            <strong>有证据</strong>
+            <span>案例、数据和你的具体动作</span>
+          </li>
+          <li>
+            <strong>能复盘</strong>
+            <span>讲清判断、取舍与下一步</span>
+          </li>
+        </ul>
+        <div class="sample-box">
+          <span>不知道怎么开始？</span>
+          <button id="load-sample">试试示例文字稿 →</button>
+        </div>
+      </aside>
+    </section>
+
+    <section id="results" class="results hidden" aria-live="polite"></section>
+  </div>
+
+  <footer class="footer">
+    面试稿教练 · 仅作练习参考，请结合真实经历调整表述
+  </footer>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
