@@ -3,29 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>面试稿教练</title>
+  <title>Interview Lab · 面试稿教练</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+  <div class="bg-glow"></div>
   <div class="page">
     <header class="header">
-      <a class="logo" href="/">面试稿<span>·</span>教练</a>
-      <p class="tagline">把面试复盘，变成下一次的底气</p>
+      <a class="logo" href="/">
+        <span class="logo-mark">IL</span>
+        Interview Lab
+      </a>
+      <p class="tagline">Turn every interview into your next advantage.</p>
     </header>
 
     <section class="hero">
       <div class="hero-content">
-        <span class="badge">INTERVIEW REVIEW</span>
-        <h1>让每一句回答<br><em>更有说服力</em></h1>
-        <p class="hero-desc">粘贴录音转写稿，或上传 PDF。几分钟内梳理表达短板、需要补的证据，以及下一轮该怎么答。</p>
+        <span class="badge">AI INTERVIEW COACH</span>
+        <h1>YOUR INTERVIEW<br><em>HAS MORE TO SAY.</em></h1>
+        <p class="hero-desc">粘贴录音转写稿或上传 PDF，几分钟内得到优先级明确的改进点、原文证据，以及下一轮可直接练习的追问。</p>
+        <div class="model-tags">
+          <span>规则引擎</span>
+          <span>本地分析</span>
+          <span>隐私优先</span>
+        </div>
       </div>
-      <div class="hero-points">
-        <div class="point">优先级明确的改进点</div>
-        <div class="point">每一项对应的原文证据</div>
-        <div class="point">可直接练习的追问清单</div>
+      <div class="hero-visual">
+        <div class="holo-card">
+          <div class="holo-inner">
+            <div class="holo-label">MIRA</div>
+            <div class="holo-title">3D AI Coach</div>
+            <div class="holo-status">Ready</div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -98,9 +111,12 @@
   </div>
 
   <footer class="footer">
-    面试稿教练 · 仅作练习参考，请结合真实经历调整表述
+    Interview Lab · 仅作练习参考，请结合真实经历调整表述
   </footer>
 
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
   <script type="module" src="/app.js"></script>
 </body>
 </html>
