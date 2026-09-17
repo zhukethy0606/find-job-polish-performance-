@@ -1,3 +1,5 @@
+import { handleFindJobs } from "./find-jobs.js";
+
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -41,6 +43,10 @@ function analyze(text, role) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/api/find-jobs") {
+      if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
+      return handleFindJobs(request, env);
+    }
     if (url.pathname !== "/api/analyze") return env.ASSETS.fetch(request);
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
     try {
