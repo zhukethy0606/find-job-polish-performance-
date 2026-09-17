@@ -106,7 +106,71 @@
         </div>
       </aside>
     </section>
+<section class="workspace">
+      <div class="input-card" style="flex:1">
+        <div class="card-header">
+          <div>
+            <span class="step">03</span>
+            <h2>帖子链接 → 公司招聘页</h2>
+          </div>
+        </div>
+        <p class="privacy" style="margin-bottom:12px">把在别处看到的面经/吐槽帖链接粘贴进来，自动提取文中公司并找到其招聘页面。</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input id="post-url" type="url" placeholder="https://www.zhihu.com/question/..." style="flex:1;min-width:240px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:inherit;font:inherit">
+          <button id="find-jobs" class="btn-primary">提取公司 →</button>
+        </div>
+        <p id="job-error" class="error"></p>
+        <div id="job-results" style="margin-top:16px;display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </section>
 
+    <section id="results" class="results hidden" aria-live="polite"></section>
+  </div>
+
+  <footer class="footer">
+    Interview Lab · 仅作练习参考，请结合真实经历调整表述
+  </footer>
+
+  <script type="module" src="/app.js"></script>
+<script type="module">
+    const btn = document.getElementById("find-jobs");
+    const input = document.getElementById("post-url");
+    const box = document.getElementById("job-results");
+    const err = document.getElementById("job-error");
+
+    btn.addEventListener("click", async () => {
+      const url = input.value.trim();
+      err.textContent = "";
+      box.innerHTML = "";
+      if (!/^https?:\/\//.test(url)) { err.textContent = "请输入完整链接（以 https:// 开头）"; return; }
+      btn.disabled = true; btn.textContent = "分析中…";
+      try {
+        const r = await fetch("/api/find-jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+        const d = await r.json();
+        if (d.error) { err.textContent = d.error; return; }
+        if (!d.companies?.length) { box.innerHTML = "<p class='privacy'>没有提取到公司，换个链接试试。</p>"; return; }
+        for (const c of d.companies) {
+          const a = document.createElement("a");
+          a.href = c.careersUrl; a.target = "_blank"; a.rel = "noopener";
+          a.textContent = `${c.name} ↗ 前往招聘页`;
+          a.style.cssText = "display:block;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);text-decoration:none;color:inherit;transition:.15s";
+          a.onmouseenter = () => a.style.background = "rgba(255,255,255,.08)";
+          a.onmouseleave = () => a.style.background = "";
+          box.appendChild(a);
+        }
+      } catch {
+        err.textContent = "请求失败，请稍后重试";
+      } finally {
+        btn.disabled = false; btn.textContent = "提取公司 →";
+      }
+    });
+  </script>
+</body>
+</html>
     <section id="results" class="results hidden" aria-live="polite"></section>
   </div>
 
