@@ -20,167 +20,115 @@
       <p class="tagline">Turn every interview into your next advantage.</p>
     </header>
 
-    <section class="hero">
-      <div class="hero-content">
-        <span class="badge">AI INTERVIEW COACH</span>
-        <h1>YOUR INTERVIEW<br><em>HAS MORE TO SAY.</em></h1>
-        <p class="hero-desc">粘贴录音转写稿或上传 PDF，几分钟内得到优先级明确的改进点、原文证据，以及下一轮可直接练习的追问。</p>
-        <div class="model-tags">
-          <span>规则引擎</span>
-          <span>本地分析</span>
-          <span>隐私优先</span>
-        </div>
+    <!-- 顶部页面切换 -->
+    <nav class="page-nav">
+      <button class="page-tab active" data-page="quick">快速投递</button>
+      <button class="page-tab" data-page="review">面试复盘</button>
+    </nav>
+
+    <!-- ========== Page 1: 快速投递 ========== -->
+    <section id="page-quick" class="page-section">
+      <div class="hero-mini">
+        <h1>从帖子一键找到公司招聘</h1>
+        <p>粘贴小红书 / 脉脉 / 知乎 / 推文等链接，自动提取提到的公司，并提供搜索路径。</p>
       </div>
-      <div class="hero-visual">
-        <div class="holo-card">
-          <div class="holo-inner">
-            <div class="holo-label">MIRA</div>
-            <div class="holo-title">3D AI Coach</div>
-            <div class="holo-status">Ready</div>
-          </div>
+
+      <div class="quick-card">
+        <label class="url-label">帖子链接</label>
+        <div class="url-row">
+          <input id="post-url" type="url" placeholder="https://... 粘贴帖子链接">
+          <button id="extract-btn" class="btn-primary">提取公司 →</button>
         </div>
+        <p id="extract-status" class="status"></p>
+        <p id="extract-error" class="error"></p>
       </div>
+
+      <div id="company-results" class="company-results hidden"></div>
     </section>
 
-    <section class="workspace">
-      <div class="input-card">
-        <div class="card-header">
-          <div>
-            <span class="step">01</span>
-            <h2>放入你的面试稿</h2>
-          </div>
-          <label class="role-label">
-            目标岗位
-            <input id="role" type="text" placeholder="例如：产品经理">
-          </label>
+    <!-- ========== Page 2: 面试复盘（原功能） ========== -->
+    <section id="page-review" class="page-section hidden">
+      <section class="hero">
+        <div class="hero-content">
+          <span class="badge">AI INTERVIEW COACH</span>
+          <h1>YOUR INTERVIEW<br><em>HAS MORE TO SAY.</em></h1>
+          <p class="hero-desc">粘贴录音转写稿或上传 PDF，几分钟内得到优先级明确的改进点、原文证据，以及下一轮可直接练习的追问。</p>
         </div>
-
-        <div class="tabs">
-          <button class="tab active" data-tab="paste">粘贴文字</button>
-          <button class="tab" data-tab="pdf">上传 PDF</button>
-        </div>
-
-        <div id="paste-pane">
-          <textarea id="transcript" placeholder="把面试录音转写稿粘贴在这里…&#10;&#10;建议保留提问和回答的原始顺序，分析会更准确。"></textarea>
-        </div>
-
-        <div id="pdf-pane" class="hidden">
-          <label class="dropzone" for="pdf-file">
-            <input id="pdf-file" type="file" accept="application/pdf,.pdf">
-            <div class="upload-icon">↑</div>
-            <div class="upload-text">
-              <strong>选择一份 PDF 文字稿</strong>
-              <span>只读取可复制文本的 PDF，不会保存文件</span>
+        <div class="hero-visual">
+          <div class="holo-card">
+            <div class="holo-inner">
+              <div class="holo-label">MIRA</div>
+              <div class="holo-title">3D AI Coach</div>
+              <div class="holo-status">Ready</div>
             </div>
-          </label>
-          <p id="pdf-status" class="status"></p>
-        </div>
-
-        <div class="actions">
-          <span class="privacy">内容只在本次分析中处理，不会被保存</span>
-          <button id="analyze" class="btn-primary">开始分析 →</button>
-        </div>
-        <p id="error" class="error"></p>
-      </div>
-
-      <aside class="guide-card">
-        <span class="step">02</span>
-        <h3>好稿的三个信号</h3>
-        <ul class="signals">
-          <li>
-            <strong>先结论</strong>
-            <span>让面试官快速抓住重点</span>
-          </li>
-          <li>
-            <strong>有证据</strong>
-            <span>案例、数据和你的具体动作</span>
-          </li>
-          <li>
-            <strong>能复盘</strong>
-            <span>讲清判断、取舍与下一步</span>
-          </li>
-        </ul>
-        <div class="sample-box">
-          <span>不知道怎么开始？</span>
-          <button id="load-sample">试试示例文字稿 →</button>
-        </div>
-      </aside>
-    </section>
-<section class="workspace">
-      <div class="input-card" style="flex:1">
-        <div class="card-header">
-          <div>
-            <span class="step">03</span>
-            <h2>帖子链接 → 公司招聘页</h2>
           </div>
         </div>
-        <p class="privacy" style="margin-bottom:12px">把在别处看到的面经/吐槽帖链接粘贴进来，自动提取文中公司并找到其招聘页面。</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <input id="post-url" type="url" placeholder="https://www.zhihu.com/question/..." style="flex:1;min-width:240px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:inherit;font:inherit">
-          <button id="find-jobs" class="btn-primary">提取公司 →</button>
+      </section>
+
+      <section class="workspace">
+        <div class="input-card">
+          <div class="card-header">
+            <div>
+              <span class="step">01</span>
+              <h2>放入你的面试稿</h2>
+            </div>
+            <label class="role-label">
+              目标岗位
+              <input id="role" type="text" placeholder="例如：产品经理">
+            </label>
+          </div>
+
+          <div class="tabs">
+            <button class="tab active" data-tab="paste">粘贴文字</button>
+            <button class="tab" data-tab="pdf">上传 PDF</button>
+          </div>
+
+          <div id="paste-pane">
+            <textarea id="transcript" placeholder="把面试录音转写稿粘贴在这里…&#10;&#10;建议保留提问和回答的原始顺序，分析会更准确。"></textarea>
+          </div>
+
+          <div id="pdf-pane" class="hidden">
+            <label class="dropzone" for="pdf-file">
+              <input id="pdf-file" type="file" accept="application/pdf,.pdf">
+              <div class="upload-icon">↑</div>
+              <div class="upload-text">
+                <strong>选择一份 PDF 文字稿</strong>
+                <span>只读取可复制文本的 PDF，不会保存文件</span>
+              </div>
+            </label>
+            <p id="pdf-status" class="status"></p>
+          </div>
+
+          <div class="actions">
+            <span class="privacy">内容只在本次分析中处理，不会被保存</span>
+            <button id="analyze" class="btn-primary">开始分析 →</button>
+          </div>
+          <p id="error" class="error"></p>
         </div>
-        <p id="job-error" class="error"></p>
-        <div id="job-results" style="margin-top:16px;display:flex;flex-direction:column;gap:10px"></div>
-      </div>
+
+        <aside class="guide-card">
+          <span class="step">02</span>
+          <h3>好稿的三个信号</h3>
+          <ul class="signals">
+            <li><strong>先结论</strong><span>让面试官快速抓住重点</span></li>
+            <li><strong>有证据</strong><span>案例、数据和你的具体动作</span></li>
+            <li><strong>能复盘</strong><span>讲清判断、取舍与下一步</span></li>
+          </ul>
+          <div class="sample-box">
+            <span>不知道怎么开始？</span>
+            <button id="load-sample">试试示例文字稿 →</button>
+          </div>
+        </aside>
+      </section>
+
+      <section id="results" class="results hidden" aria-live="polite"></section>
     </section>
-
-    <section id="results" class="results hidden" aria-live="polite"></section>
   </div>
 
   <footer class="footer">
     Interview Lab · 仅作练习参考，请结合真实经历调整表述
   </footer>
 
-  <script type="module" src="/app.js"></script>
-<script type="module">
-    const btn = document.getElementById("find-jobs");
-    const input = document.getElementById("post-url");
-    const box = document.getElementById("job-results");
-    const err = document.getElementById("job-error");
-
-    btn.addEventListener("click", async () => {
-      const url = input.value.trim();
-      err.textContent = "";
-      box.innerHTML = "";
-      if (!/^https?:\/\//.test(url)) { err.textContent = "请输入完整链接（以 https:// 开头）"; return; }
-      btn.disabled = true; btn.textContent = "分析中…";
-      try {
-        const r = await fetch("/api/find-jobs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
-        });
-        const d = await r.json();
-        if (d.error) { err.textContent = d.error; return; }
-        if (!d.companies?.length) { box.innerHTML = "<p class='privacy'>没有提取到公司，换个链接试试。</p>"; return; }
-        for (const c of d.companies) {
-          const a = document.createElement("a");
-          a.href = c.careersUrl; a.target = "_blank"; a.rel = "noopener";
-          a.textContent = `${c.name} ↗ 前往招聘页`;
-          a.style.cssText = "display:block;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);text-decoration:none;color:inherit;transition:.15s";
-          a.onmouseenter = () => a.style.background = "rgba(255,255,255,.08)";
-          a.onmouseleave = () => a.style.background = "";
-          box.appendChild(a);
-        }
-      } catch {
-        err.textContent = "请求失败，请稍后重试";
-      } finally {
-        btn.disabled = false; btn.textContent = "提取公司 →";
-      }
-    });
-  </script>
-</body>
-</html>
-    <section id="results" class="results hidden" aria-live="polite"></section>
-  </div>
-
-  <footer class="footer">
-    Interview Lab · 仅作练习参考，请结合真实经历调整表述
-  </footer>
-
-  <script type="module" src="/app.js"></script>
-</body>
-</html>
   <script type="module" src="/app.js"></script>
 </body>
 </html>
