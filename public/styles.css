@@ -774,3 +774,146 @@ textarea::placeholder {
     width: 100%;
   }
 }
+/* ===== 新增：双页面导航 & 快速投递 ===== */
+.page-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 40px;
+  background: var(--card, #12141c);
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--line, #1e212b);
+  width: fit-content;
+}
+
+.page-tab {
+  background: transparent;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted, #8d919d);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-tab.active {
+  background: linear-gradient(135deg, #8b7cff, #7a6af0);
+  color: white;
+}
+
+.page-section.hidden {
+  display: none !important;
+}
+
+.hero-mini {
+  margin-bottom: 32px;
+}
+
+.hero-mini h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.hero-mini p {
+  color: var(--muted, #8d919d);
+  font-size: 15px;
+}
+
+.quick-card {
+  background: var(--card, #12141c);
+  border: 1px solid var(--line, #1e212b);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 28px;
+}
+
+.url-label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted, #8d919d);
+  margin-bottom: 10px;
+}
+
+.url-row {
+  display: flex;
+  gap: 12px;
+}
+
+#post-url {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--line, #1e212b);
+  background: var(--bg-elevated, #0e1016);
+  color: var(--ink, #f0f2f5);
+  font-size: 14px;
+  outline: none;
+}
+
+#post-url:focus {
+  border-color: #8b7cff;
+}
+
+.company-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.company-card {
+  background: var(--card, #12141c);
+  border: 1px solid var(--line, #1e212b);
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.company-name {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.search-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.search-btns a {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--line, #1e212b);
+  color: var(--ink, #f0f2f5);
+  transition: all 0.2s;
+}
+
+.search-btns a:hover {
+  border-color: #8b7cff;
+  color: #8b7cff;
+}
+
+.search-btns a.google { border-color: #4285f4; }
+.search-btns a.baidu { border-color: #2932e1; }
+.search-btns a.safari { border-color: #5de1ff; }
+
+@media (max-width: 600px) {
+  .url-row {
+    flex-direction: column;
+  }
+  .company-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
