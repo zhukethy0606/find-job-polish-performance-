@@ -1,13 +1,93 @@
-const $ = (selector) => document.querySelector(selector);
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+// ========== 页面切换 ==========
+$$(".page-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    $$(".page-tab").forEach((t) => t.classList.remove("active"));
+    tab.classList.add("active");
+    const page = tab.dataset.page;
+    $("#page-quick").classList.toggle("hidden", page !== "quick");
+    $("#page-review").classList.toggle("hidden", page !== "review");
+  });
+});
+
+// ========== Page 1: 快速投递 ==========
+$("#extract-btn").addEventListener("click", async () => {
+  const url = $("#post-url").value.trim();
+  const status = $("#extract-status");
+  const error = $("#extract-error");
+  const results = $("#company-results");
+
+  error.textContent = "";
+  results.classList.add("hidden");
+  results.innerHTML = "";
+
+  if (!url || !/^https?:\/\//i.test(url)) {
+    error.textContent = "请输入有效的帖子链接（以 http 或 https 开头）";
+    return;
+  }
+
+  const btn = $("#extract-btn");
+  btn.disabled = true;
+  btn.textContent = "正在提取…";
+  status.textContent = "正在抓取帖子内容…";
+
+  try {
+    const res = await fetch("/api/extract-companies", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "提取失败");
+
+    status.textContent = data.companies.length
+      ? `共找到 ${data.companies.length} 个可能的公司`
+      : "未识别到明显的公司名，可尝试换一篇帖子";
+
+    if (data.companies.length) {
+      results.innerHTML = data.companies
+        .map((name) => {
+          const q = encodeURIComponent(name + " 招聘官网");
+          return `
+            <div class="company-card">
+              <div class="company-name">${escapeHtml(name)}</div>
+              <div class="search-btns">
+                <a class="google" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">Google 搜索</a>
+                <a class="baidu" href="https://www.baidu.com/s?wd=${q}" target="_blank" rel="noopener">百度搜索</a>
+                <a class="safari" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">Safari 打开</a>
+              </div>
+            </div>`;
+        })
+        .join("");
+      results.classList.remove("hidden");
+    }
+  } catch (err) {
+    error.textContent = err.message || "提取失败，请稍后重试";
+    status.textContent = "";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "提取公司 →";
+  }
+});
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+  );
+}
+
+// ========== Page 2: 面试复盘（原逻辑） ==========
 const transcript = $("#transcript");
 const results = $("#results");
 const error = $("#error");
 const pdfStatus = $("#pdf-status");
 let extractedText = "";
 
-document.querySelectorAll(".tab").forEach((tab) => {
+$$(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach((btn) => btn.classList.toggle("active", btn === tab));
+    $$(".tab").forEach((b) => b.classList.toggle("active", b === tab));
     $("#paste-pane").classList.toggle("hidden", tab.dataset.tab !== "paste");
     $("#pdf-pane").classList.toggle("hidden", tab.dataset.tab !== "pdf");
   });
@@ -32,14 +112,12 @@ $("#pdf-file").addEventListener("change", async (event) => {
   }
   pdfStatus.textContent = "正在提取 PDF 中的文字…";
   try {
-    // 改用 CDN 加载 PDF.js，不需要本地 vendor 文件夹
     const pdfjsLib = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs");
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
-    
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
     const pages = [];
-    for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
-      const content = await (await pdf.getPage(pageNo)).getTextContent();
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const content = await (await pdf.getPage(i)).getTextContent();
       pages.push(content.items.map((item) => item.str).join(" "));
     }
     extractedText = pages.join("\n").trim();
@@ -47,16 +125,10 @@ $("#pdf-file").addEventListener("change", async (event) => {
       ? `已读取「${file.name}」的 ${pdf.numPages} 页文字，可开始分析。`
       : "没有读到可复制文字；请上传文字版 PDF 或直接粘贴转写稿。";
   } catch (err) {
-    console.error("PDF extraction failed", err);
-    pdfStatus.textContent = "PDF 读取失败：请确认文件未加密且包含可复制文字；扫描版 PDF 请先做文字识别，或直接粘贴转写稿。";
+    console.error(err);
+    pdfStatus.textContent = "PDF 读取失败：请确认文件未加密且包含可复制文字。";
   }
 });
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (char) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char])
-  );
-}
 
 function render(data) {
   const issuesHtml = data.issues.length
@@ -69,8 +141,7 @@ function render(data) {
             <blockquote>${escapeHtml(item.evidence)}</blockquote>
             <div class="fix"><strong>建议：</strong>${escapeHtml(item.fix)}</div>
           </div>
-        </div>
-      `).join("")
+        </div>`).join("")
     : `<p style="font-size:14px;color:var(--muted)">还不错！请尝试把回答再压缩成 60 秒版本。</p>`;
 
   results.innerHTML = `
@@ -84,13 +155,11 @@ function render(data) {
         <div class="label">/ 100 表达准备度</div>
       </div>
     </div>
-
     <div class="stats-row">
       <div class="stat"><strong>${data.wordCount}</strong> 字文字稿</div>
       <div class="stat"><strong>${data.metrics}</strong> 个量化信息</div>
       <div class="stat"><strong>${data.filler}</strong> 处缓冲词</div>
     </div>
-
     <div class="result-grid">
       <section>
         <h3>优先改进</h3>
@@ -98,17 +167,11 @@ function render(data) {
       </section>
       <div class="side-panel">
         <h3>已有基础</h3>
-        <ul>
-          ${data.strengths.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}
-        </ul>
+        <ul>${data.strengths.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ul>
         <h3>下一轮可能追问</h3>
-        <ol>
-          ${data.followUps.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}
-        </ol>
+        <ol>${data.followUps.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}</ol>
       </div>
-    </div>
-  `;
-
+    </div>`;
   results.classList.remove("hidden");
   results.scrollIntoView({ behavior: "smooth", block: "start" });
 }
