@@ -44,19 +44,15 @@ function analyze(text, role) {
   return { score, wordCount: words, metrics, filler, strengths, issues: issues.slice(0, 5), followUps, summary: issues.length ? "建议优先补强高优先级项，再练习用 STAR 结构压缩表达。" : "基础表达较完整；下一步请重点练习更短、更有结论的版本。" };
 }
 
-// ========== 新增：简单公司名提取 ==========
-function extractCompanies(text) {
+// 规则提取（备用）
+function extractCompaniesByRule(text) {
   const companies = new Set();
-
-  // 中文公司常见后缀
   const cnPattern = /([\u4e00-\u9fa5]{2,12}(?:科技|网络|信息|软件|互联网|集团|控股|股份|有限公司|公司|银行|证券|保险|医院|大学|研究院|中心))/g;
   let m;
   while ((m = cnPattern.exec(text)) !== null) {
     const name = m[1].replace(/(的|和|与|及|等)$/, "").trim();
     if (name.length >= 3 && name.length <= 16) companies.add(name);
   }
-
-  // 英文公司名
   const enPattern = /\b([A-Z][A-Za-z0-9&.\-]{1,20}(?:\s+[A-Z][A-Za-z0-9&.\-]{1,15}){0,3})\b/g;
   while ((m = enPattern.exec(text)) !== null) {
     const name = m[1].trim();
@@ -64,22 +60,62 @@ function extractCompanies(text) {
       companies.add(name);
     }
   }
-
   return Array.from(companies).slice(0, 15);
 }
 
-// ========== 路由 ==========
+// DeepSeek 提取公司
+async function extractCompaniesByAI(text, apiKey) {
+  const prompt = `从下面这段文字中提取所有提到的公司名称（包括中文和英文公司）。
+只返回公司名，用 JSON 数组格式，例如：["字节跳动","阿里巴巴","Google"]
+不要解释，不要其他文字。如果没有公司就返回 []。
+
+文字内容：
+${text.slice(0, 8000)}`;
+
+  const resp = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "deepseek-chat",
+      messages: [
+        { role: "system", content: "你是一个只输出 JSON 的助手。" },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.1,
+      max_tokens: 500,
+    }),
+  });
+
+  if (!resp.ok) {
+    const errText = await resp.text();
+    throw new Error(`DeepSeek API 错误: ${resp.status} ${errText}`);
+  }
+
+  const data = await resp.json();
+  const content = data.choices?.[0]?.message?.content || "[]";
+  // 尝试解析 JSON
+  const match = content.match(/\[[\s\S]*\]/);
+  if (!match) return [];
+  try {
+    const list = JSON.parse(match[0]);
+    return Array.isArray(list) ? list.map(String).filter(Boolean).slice(0, 15) : [];
+  } catch {
+    return [];
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // 原有：找工作接口
     if (url.pathname === "/api/find-jobs") {
       if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
       return handleFindJobs(request, env);
     }
 
-    // 原有：面试稿分析
     if (url.pathname === "/api/analyze") {
       if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
       try {
@@ -90,47 +126,64 @@ export default {
         if (text.length > 60000) return json({ error: "一次最多分析 60,000 个字符。" }, 413);
         return json(analyze(text, typeof role === "string" ? role.slice(0, 100) : ""));
       } catch (error) {
-        console.log(JSON.stringify({ event: "analysis_error", message: error instanceof Error ? error.message : "unknown" }));
         return json({ error: "无法读取内容，请检查后重试。" }, 400);
       }
     }
 
-    // 新增：从帖子提取公司
+    // 提取公司（支持 url 或 text）
     if (url.pathname === "/api/extract-companies") {
       if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
       try {
-        const { url: targetUrl } = await request.json();
-        if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
-          return json({ error: "无效的链接" }, 400);
+        const body = await request.json();
+        let text = "";
+
+        if (body.text && typeof body.text === "string") {
+          text = body.text.trim();
+        } else if (body.url && /^https?:\/\//i.test(body.url)) {
+          const resp = await fetch(body.url, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (compatible; InterviewLab/1.0)",
+              Accept: "text/html,application/xhtml+xml",
+            },
+            redirect: "follow",
+          });
+          if (!resp.ok) return json({ error: `无法访问该链接（${resp.status}）` }, 400);
+          const html = await resp.text();
+          text = html
+            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, " ")
+            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, " ")
+            .replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .slice(0, 30000);
+        } else {
+          return json({ error: "请提供帖子链接或文字内容" }, 400);
         }
 
-        const resp = await fetch(targetUrl, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; InterviewLab/1.0)",
-            "Accept": "text/html,application/xhtml+xml",
-          },
-          redirect: "follow",
-        });
+        if (text.length < 10) {
+          return json({ error: "内容太少，无法提取" }, 400);
+        }
 
-        if (!resp.ok) return json({ error: `无法访问该链接（${resp.status}）` }, 400);
+        let companies = [];
+        // 优先用 DeepSeek
+        if (env.DEEPSEEK_API_KEY) {
+          try {
+            companies = await extractCompaniesByAI(text, env.DEEPSEEK_API_KEY);
+          } catch (e) {
+            console.log("AI extract failed, fallback to rule", e.message);
+          }
+        }
+        // 失败或结果为空时用规则
+        if (!companies.length) {
+          companies = extractCompaniesByRule(text);
+        }
 
-        const html = await resp.text();
-        const text = html
-          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, " ")
-          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, " ")
-          .replace(/<[^>]+>/g, " ")
-          .replace(/\s+/g, " ")
-          .slice(0, 30000);
-
-        const companies = extractCompanies(text);
         return json({ companies, textLength: text.length });
       } catch (e) {
         console.log("extract error", e.message);
-        return json({ error: "抓取失败，该网站可能有反爬限制，请换一篇帖子试试" }, 400);
+        return json({ error: "提取失败，请稍后重试或直接粘贴文字" }, 400);
       }
     }
 
-    // 其他请求走静态资源
     return env.ASSETS.fetch(request);
   },
 };
