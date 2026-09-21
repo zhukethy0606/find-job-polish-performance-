@@ -5,12 +5,15 @@ const json = (body, status = 200) =>
     status,
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
   });
+
 const clean = (text) => text.replace(/\s+/g, " ").trim();
 const sentences = (text) => text.split(/(?<=[。！？!?；;])\s*|\n+/).map(clean).filter(Boolean);
 const count = (text, pattern) => (text.match(pattern) || []).length;
+
 function findEvidence(items, pattern) {
   return items.find((item) => pattern.test(item)) || "文字稿中没有找到明确例子";
 }
+
 function analyze(text, role) {
   const normalized = clean(text);
   const parts = sentences(text);
@@ -40,23 +43,94 @@ function analyze(text, role) {
   ];
   return { score, wordCount: words, metrics, filler, strengths, issues: issues.slice(0, 5), followUps, summary: issues.length ? "建议优先补强高优先级项，再练习用 STAR 结构压缩表达。" : "基础表达较完整；下一步请重点练习更短、更有结论的版本。" };
 }
+
+// ========== 新增：简单公司名提取 ==========
+function extractCompanies(text) {
+  const companies = new Set();
+
+  // 中文公司常见后缀
+  const cnPattern = /([\u4e00-\u9fa5]{2,12}(?:科技|网络|信息|软件|互联网|集团|控股|股份|有限公司|公司|银行|证券|保险|医院|大学|研究院|中心))/g;
+  let m;
+  while ((m = cnPattern.exec(text)) !== null) {
+    const name = m[1].replace(/(的|和|与|及|等)$/, "").trim();
+    if (name.length >= 3 && name.length <= 16) companies.add(name);
+  }
+
+  // 英文公司名
+  const enPattern = /\b([A-Z][A-Za-z0-9&.\-]{1,20}(?:\s+[A-Z][A-Za-z0-9&.\-]{1,15}){0,3})\b/g;
+  while ((m = enPattern.exec(text)) !== null) {
+    const name = m[1].trim();
+    if (name.length >= 2 && !/^(The|And|For|With|This|That|From)$/i.test(name)) {
+      companies.add(name);
+    }
+  }
+
+  return Array.from(companies).slice(0, 15);
+}
+
+// ========== 路由 ==========
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // 原有：找工作接口
     if (url.pathname === "/api/find-jobs") {
       if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
       return handleFindJobs(request, env);
     }
-    if (url.pathname !== "/api/analyze") return env.ASSETS.fetch(request);
-    if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
-    try {
-      const { text, role } = await request.json();
-      if (typeof text !== "string" || clean(text).length < 40) return json({ error: "请至少提供 40 个字符的文字稿。" }, 400);
-      if (text.length > 60000) return json({ error: "一次最多分析 60,000 个字符。" }, 413);
-      return json(analyze(text, typeof role === "string" ? role.slice(0, 100) : ""));
-    } catch (error) {
-      console.log(JSON.stringify({ event: "analysis_error", message: error instanceof Error ? error.message : "unknown" }));
-      return json({ error: "无法读取内容，请检查后重试。" }, 400);
+
+    // 原有：面试稿分析
+    if (url.pathname === "/api/analyze") {
+      if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
+      try {
+        const { text, role } = await request.json();
+        if (typeof text !== "string" || clean(text).length < 40) {
+          return json({ error: "请至少提供 40 个字符的文字稿。" }, 400);
+        }
+        if (text.length > 60000) return json({ error: "一次最多分析 60,000 个字符。" }, 413);
+        return json(analyze(text, typeof role === "string" ? role.slice(0, 100) : ""));
+      } catch (error) {
+        console.log(JSON.stringify({ event: "analysis_error", message: error instanceof Error ? error.message : "unknown" }));
+        return json({ error: "无法读取内容，请检查后重试。" }, 400);
+      }
     }
+
+    // 新增：从帖子提取公司
+    if (url.pathname === "/api/extract-companies") {
+      if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
+      try {
+        const { url: targetUrl } = await request.json();
+        if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
+          return json({ error: "无效的链接" }, 400);
+        }
+
+        const resp = await fetch(targetUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; InterviewLab/1.0)",
+            "Accept": "text/html,application/xhtml+xml",
+          },
+          redirect: "follow",
+        });
+
+        if (!resp.ok) return json({ error: `无法访问该链接（${resp.status}）` }, 400);
+
+        const html = await resp.text();
+        const text = html
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, " ")
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, " ")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .slice(0, 30000);
+
+        const companies = extractCompanies(text);
+        return json({ companies, textLength: text.length });
+      } catch (e) {
+        console.log("extract error", e.message);
+        return json({ error: "抓取失败，该网站可能有反爬限制，请换一篇帖子试试" }, 400);
+      }
+    }
+
+    // 其他请求走静态资源
+    return env.ASSETS.fetch(request);
   },
 };
