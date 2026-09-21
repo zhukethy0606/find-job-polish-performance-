@@ -30,15 +30,31 @@
     <section id="page-quick" class="page-section">
       <div class="hero-mini">
         <h1>从帖子一键找到公司招聘</h1>
-        <p>粘贴小红书 / 脉脉 / 知乎 / 推文等链接，自动提取提到的公司，并提供搜索路径。</p>
+        <p>支持粘贴帖子链接，或直接复制帖子文字，自动提取提到的公司，并提供搜索路径。</p>
       </div>
 
       <div class="quick-card">
-        <label class="url-label">帖子链接</label>
-        <div class="url-row">
-          <input id="post-url" type="url" placeholder="https://... 粘贴帖子链接">
-          <button id="extract-btn" class="btn-primary">提取公司 →</button>
+        <div class="tabs" style="margin-bottom: 16px;">
+          <button class="tab active" data-extract-tab="url">粘贴链接</button>
+          <button class="tab" data-extract-tab="text">粘贴文字</button>
         </div>
+
+        <div id="extract-url-pane">
+          <label class="url-label">帖子链接</label>
+          <div class="url-row">
+            <input id="post-url" type="url" placeholder="https://... 粘贴小红书/脉脉/知乎等链接">
+            <button id="extract-btn" class="btn-primary">提取公司 →</button>
+          </div>
+        </div>
+
+        <div id="extract-text-pane" class="hidden">
+          <label class="url-label">帖子正文</label>
+          <textarea id="post-text" rows="6" placeholder="把帖子里的文字直接复制粘贴到这里…"></textarea>
+          <div style="margin-top: 12px; text-align: right;">
+            <button id="extract-text-btn" class="btn-primary">提取公司 →</button>
+          </div>
+        </div>
+
         <p id="extract-status" class="status"></p>
         <p id="extract-error" class="error"></p>
       </div>
