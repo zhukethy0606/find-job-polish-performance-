@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>岗位中心 · Interview Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/job-hunt.css">
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="page job-hunt-page">
+    <header class="header">
+      <a class="logo" href="/">
+        <span class="logo-mark">IL</span>
+        Interview Lab
+      </a>
+      <nav class="top-links">
+        <a href="/">快速投递 / 面试复盘</a>
+        <a href="/job-hunt.html" class="active">岗位中心</a>
+      </nav>
+    </header>
+
+    <div class="jh-hero">
+      <h1>岗位中心</h1>
+      <p>发现岗位、管理投递进度。官网投递请点「官网查看」，本站不代你登录或提交。</p>
+    </div>
+
+    <!-- 偏好 -->
+    <section class="jh-card">
+      <h2>求职偏好</h2>
+      <div class="jh-pref-grid">
+        <label>目标方向
+          <input id="pref-direction" type="text" placeholder="如：产品 / 出海 / 硬件">
+        </label>
+        <label>城市
+          <input id="pref-city" type="text" placeholder="如：上海 / 远程">
+        </label>
+        <label>毕业时间
+          <input id="pref-grad" type="text" placeholder="如：2026.06">
+        </label>
+        <label>关键词
+          <input id="pref-keywords" type="text" placeholder="用逗号分隔，如：B端,增长">
+        </label>
+        <label>是否实习
+          <select id="pref-intern">
+            <option value="both">实习+全职</option>
+            <option value="intern">仅实习</option>
+            <option value="full">仅全职</option>
+          </select>
+        </label>
+        <label>简历版本备注
+          <input id="pref-resume" type="text" placeholder="如：v3-产品向">
+        </label>
+      </div>
+      <div class="jh-actions">
+        <button id="save-pref" class="btn-primary">保存偏好</button>
+        <span id="pref-status" class="status"></span>
+      </div>
+    </section>
+
+    <!-- 添加公司 / 岗位 -->
+    <section class="jh-card">
+      <h2>添加公司 / 岗位</h2>
+      <div class="jh-add-grid">
+        <label>公司名
+          <input id="co-name" type="text" placeholder="如：安克创新">
+        </label>
+        <label>招聘官网
+          <input id="co-url" type="url" placeholder="https://...">
+        </label>
+        <label>岗位名称
+          <input id="job-title" type="text" placeholder="如：产品经理">
+        </label>
+        <label>城市
+          <input id="job-city" type="text" placeholder="如：深圳">
+        </label>
+        <label>职位链接
+          <input id="job-url" type="url" placeholder="官网具体职位页 URL">
+        </label>
+        <label>截止日期
+          <input id="job-deadline" type="date">
+        </label>
+        <label class="full">JD 摘要
+          <textarea id="job-jd" rows="2" placeholder="可选，粘贴关键要求"></textarea>
+        </label>
+      </div>
+      <div class="jh-actions">
+        <button id="add-job" class="btn-primary">加入岗位库</button>
+        <span id="add-status" class="status"></span>
+      </div>
+    </section>
+
+    <div class="jh-layout">
+      <!-- 左：岗位列表 -->
+      <section class="jh-card">
+        <div class="jh-section-head">
+          <h2>岗位库</h2>
+          <input id="job-filter" type="search" placeholder="筛选公司/岗位/城市">
+        </div>
+        <div id="job-list" class="jh-job-list"></div>
+      </section>
+
+      <!-- 右：看板 + 待办 -->
+      <aside class="jh-side">
+        <section class="jh-card">
+          <h2>投递看板</h2>
+          <div id="board" class="jh-board"></div>
+        </section>
+        <section class="jh-card">
+          <h2>本周提醒</h2>
+          <ul id="todo-list" class="jh-todo"></ul>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <footer class="footer">
+    Interview Lab · 岗位中心仅作个人进度管理，请在官网完成正式投递
+  </footer>
+  <script type="module" src="/job-hunt.js"></script>
+</body>
+</html>
