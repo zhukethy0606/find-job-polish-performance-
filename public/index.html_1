@@ -30,13 +30,6 @@
     <section id="page-quick" class="page-section">
       <div class="hero-mini">
         <h1>从帖子一键找到公司招聘</h1>
-        <p>支持粘贴帖子链接，或直接复制帖子文字，自动提取提到的公司，并提供搜索路径。</p>
-      </div>
-
-         <!-- ========== Page 1: 快速投递 ========== -->
-    <section id="page-quick" class="page-section">
-      <div class="hero-mini">
-        <h1>从帖子一键找到公司招聘</h1>
         <p>支持粘贴链接、直接粘贴文字，或上传截图，自动提取公司并提供搜索路径。</p>
       </div>
 
@@ -89,7 +82,7 @@
       <div id="company-results" class="company-results hidden"></div>
     </section>
 
-    <!-- ========== Page 2: 面试复盘（原功能） ========== -->
+    <!-- ========== Page 2: 面试复盘 ========== -->
     <section id="page-review" class="page-section hidden">
       <section class="hero">
         <div class="hero-content">
