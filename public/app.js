@@ -1,3 +1,15 @@
+// 动态加载 Tesseract（仅截图时用）
+async function loadTesseract() {
+  if (window.Tesseract) return window.Tesseract;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("OCR 脚本加载失败"));
+    document.head.appendChild(s);
+  });
+  return window.Tesseract;
+}
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
