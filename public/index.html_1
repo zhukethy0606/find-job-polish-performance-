@@ -33,12 +33,21 @@
         <p>支持粘贴帖子链接，或直接复制帖子文字，自动提取提到的公司，并提供搜索路径。</p>
       </div>
 
+         <!-- ========== Page 1: 快速投递 ========== -->
+    <section id="page-quick" class="page-section">
+      <div class="hero-mini">
+        <h1>从帖子一键找到公司招聘</h1>
+        <p>支持粘贴链接、直接粘贴文字，或上传截图，自动提取公司并提供搜索路径。</p>
+      </div>
+
       <div class="quick-card">
         <div class="tabs" style="margin-bottom: 16px;">
           <button class="tab active" data-extract-tab="url">粘贴链接</button>
           <button class="tab" data-extract-tab="text">粘贴文字</button>
+          <button class="tab" data-extract-tab="image">上传截图</button>
         </div>
 
+        <!-- 链接 -->
         <div id="extract-url-pane">
           <label class="url-label">帖子链接</label>
           <div class="url-row">
@@ -47,11 +56,29 @@
           </div>
         </div>
 
+        <!-- 文字 -->
         <div id="extract-text-pane" class="hidden">
           <label class="url-label">帖子正文</label>
           <textarea id="post-text" rows="6" placeholder="把帖子里的文字直接复制粘贴到这里…"></textarea>
           <div style="margin-top: 12px; text-align: right;">
             <button id="extract-text-btn" class="btn-primary">提取公司 →</button>
+          </div>
+        </div>
+
+        <!-- 截图 -->
+        <div id="extract-image-pane" class="hidden">
+          <label class="url-label">上传截图（支持手机拍照 / 相册 / 拖拽）</label>
+          <label class="dropzone" for="post-image" id="image-dropzone">
+            <input id="post-image" type="file" accept="image/*" capture="environment">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">
+              <strong>点击或拖入截图</strong>
+              <span>识别图中文字后自动提取公司，不会上传保存图片</span>
+            </div>
+          </label>
+          <p id="image-preview-name" class="status"></p>
+          <div style="margin-top: 12px; text-align: right;">
+            <button id="extract-image-btn" class="btn-primary" disabled>提取公司 →</button>
           </div>
         </div>
 
